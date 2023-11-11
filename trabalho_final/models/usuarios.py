@@ -1,32 +1,27 @@
-# usuarios.py
-from sqlalchemy import Column, String, Enum, Text, Date, create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import relationship
-from config import DATABASES
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+metadata = Base.metadata
+
 
 Base = declarative_base()
 
-class Usuarios(Base):
+class Usuario(Base):
     __tablename__ = 'usuarios'
+    __table_args__ = (
+        CheckConstraint("((broadcaster_type)::text = 'affiliate'::text) OR ((broadcaster_type)::text = 'partner'::text) OR ((broadcaster_type)::text = ''::text)"),
+        CheckConstraint("((user_type)::text = 'admin'::text) OR ((user_type)::text = 'global mod'::text) OR ((user_type)::text = 'staff'::text) OR ((user_type)::text = ''::text)"),
+        {'schema': 'public'}
+    )
 
-    id = Column(String(13), primary_key=True)
-    login = Column(String(30), nullable=False)
-    display_name = Column(String(30))
-    TYPE_CHOICES = ('admin', 'global mod', 'staff', '')
-    type = Column(Enum(*TYPE_CHOICES, name='user_type_enum'), nullable=False)
-    BROADCASTER_TYPE_CHOICES = ('affiliate', 'partner')
-    broadcaster_type = Column(Enum(*BROADCASTER_TYPE_CHOICES, name='broadcaster_type_enum'), nullable=False)
+    codigo = Column(Integer, primary_key=True, server_default=text("nextval('\"public\".usuarios_codigo_seq'::regclass)"))
+    user_id = Column(String(13), nullable=False, unique=True)
+    login = Column(String(30), nullable=False, unique=True)
+    display_name = Column(String(30), nullable=False, unique=True)
+    user_type = Column(String(10))
+    broadcaster_type = Column(String(10))
     description = Column(Text)
-    email = Column(String(30), unique=True)
+    email = Column(String(30), nullable=False, unique=True)
     created_at = Column(Date)
-
-    # Adiciona os relacionamentos
-    streams = relationship('Streams', back_populates='usuario')
-
-# Obtém as configurações do banco de dados do Django
-database_config = DATABASES['default']
-database_url = (
-    f"postgresql+psycopg2://{database_config['USER']}:{database_config['PASSWORD']}@"
-    f"{database_config['HOST']}:{database_config['PORT']}/{database_config['NAME']}"
-)
-

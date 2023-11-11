@@ -79,3 +79,5 @@ class API:
                 print(f"Stream: {streamID} já cadastrada!")
         
         #return data.get('data')
+    
+    

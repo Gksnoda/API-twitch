@@ -1,7 +1,7 @@
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'BD2_Trabalho_Final',
+        'NAME': 'BD2_trabalho_Twitch',
         'USER': 'user_dba',
         'PASSWORD': 'senha123',
         'HOST': 'localhost',  # Ou o host do seu banco de dados

@@ -1,20 +1,17 @@
-# categorias.py
-from sqlalchemy import Column, String, create_engine
+from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from config import DATABASES
+
+Base = declarative_base()
+metadata = Base.metadata
+
 
 Base = declarative_base()
 
-class Categorias(Base):
-    __tablename__ = 'categorias'
+class Category(Base):
+    __tablename__ = 'categories'
+    __table_args__ = {'schema': 'public'}
 
-    id = Column(String(13), primary_key=True)
-    name = Column(String(30), nullable=False)
-
-# Obtém as configurações do banco de dados do Django
-database_config = DATABASES['default']
-database_url = (
-    f"postgresql+psycopg2://{database_config['USER']}:{database_config['PASSWORD']}@"
-    f"{database_config['HOST']}:{database_config['PORT']}/{database_config['NAME']}"
-)
-
+    codigo = Column(Integer, primary_key=True, server_default=text("nextval('\"public\".categories_codigo_seq'::regclass)"))
+    category_id = Column(String(13), nullable=False, unique=True)
+    category_name = Column(String(80), nullable=False, unique=True)

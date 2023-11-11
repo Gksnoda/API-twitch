@@ -1,25 +1,24 @@
-# polls.py
-from sqlalchemy import Column, String, Enum, Date, Integer, create_engine
+# coding: utf-8
+from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from config import DATABASES
 
 Base = declarative_base()
-
-class Polls(Base):
+metadata = Base.metadata
+class Poll(Base):
     __tablename__ = 'polls'
+    __table_args__ = (
+        CheckConstraint("((status)::text = 'ACTIVE'::text) OR ((status)::text = 'COMPLETED'::text) OR ((status)::text = 'TERMINATED'::text) OR ((status)::text = 'ARCHIVED'::text) OR ((status)::text = 'MODERATED'::text) OR ((status)::text = 'INVALID'::text)"),
+        {'schema': 'public'}
+    )
 
-    id = Column(String(13), primary_key=True)
+    codigo = Column(Integer, primary_key=True, server_default=text("nextval('\"public\".polls_codigo_seq'::regclass)"))
+    poll_id = Column(String(13))
     title = Column(String(80), nullable=False)
-    STATUS_CHOICES = ('ACTIVE', 'COMPLETED', 'TERMINATED', 'ARCHIVED', 'MODERATED', 'INVALID')
-    status = Column(Enum(*STATUS_CHOICES, name='poll_status_enum'), nullable=False)
-    started_at = Column(Date, nullable=False)
-    ended_at = Column(Date, nullable=False)
-    votes = Column(Integer, nullable=False)
+    status = Column(String(10))
+    started_at = Column(Date)
+    ended_at = Column(Date)
+    votes = Column(Integer)
+    broadcaster_id = Column(ForeignKey('public.canais.channel_id'))
 
-# Obtém as configurações do banco de dados do Django
-database_config = DATABASES['default']
-database_url = (
-    f"postgresql+psycopg2://{database_config['USER']}:{database_config['PASSWORD']}@"
-    f"{database_config['HOST']}:{database_config['PORT']}/{database_config['NAME']}"
-)
-
+    broadcaster = relationship('Canais')
