@@ -9,30 +9,36 @@ class Controller:
     def start(self):
         opcao = self.view.start()
 
-        while opcao != 5:
+        while opcao != 8:
             if opcao == 1:
-                #print('1111111')
-                # Obtém informações sobre streams e imprime o resultado
                 token_acesso = self.API.get_app_access_token()
-                streams = self.API.get_streams(token_acesso)
+                usuarios = self.API.get_users(token_acesso)
 
             if opcao == 2:
                 token_acesso = self.API.get_app_access_token()
                 canais = self.API.get_canais(token_acesso)
-        
+
             if opcao == 3:
-                token_acesso = self.API.get_app_access_token()
-                usuarios = self.API.get_users(token_acesso)
-            
+                print('Polls')
+
             if opcao == 4:
                 token_acesso = self.API.get_app_access_token()
-                polls = self.API.get_polls(token_acesso)
+                streams = self.API.get_streams(token_acesso)
 
             if opcao == 5:
-                print("inserir")
+                print('categories')
+
+            if opcao == 6:
+                print('tags')
+                
+            if opcao == 7:
+                vprint('stream_categories')
+
             #else:
-            #    print("Opção inválida. Por favor, escolha uma opção válida.")
+                #print("\nOpção inválida.\n")
+            
             opcao = self.view.menu()
+
 
 if __name__ == "__main__":
     # Obtém o app access token

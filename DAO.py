@@ -5,7 +5,7 @@ from mapeamento import *
 from urllib.parse import quote_plus
 
 # Substitua 'sua_senha' pela senha correta do seu banco de dados
-senha_codificada = quote_plus('@Senha123')
+senha_codificada = quote_plus('root')
 
 # Use a senha codificada na URL de conexão
 

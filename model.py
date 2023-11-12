@@ -118,7 +118,7 @@ class DB:
 class API:
     def __init__(self):
         self.client_id = 'qphncqmutk6rmxx5dgbrihjmxzh03d'
-        self.client_secret = 'i32un9n7w8udb2vy2sl4x6rvw8cphf'
+        self.client_secret = 'zozuslb1mq6vfph841e9v5wpcjm73f'
 
     # Obter o token de acesso
     def get_app_access_token(self):
@@ -132,7 +132,7 @@ class API:
         data = response.json()
         return data.get('access_token')
 
-# Altere a função get_users para chamar get_broadcaster_names e imprimir os nomes retornados
+    # Altere a função get_users para chamar get_broadcaster_names e imprimir os nomes retornados
     def get_users(self, token_acesso):
         # Chame a função para obter os nomes dos transmissores
         broadcaster_names = self.get_broadcaster_names(token_acesso)
@@ -157,7 +157,7 @@ class API:
             data = response.json()
 
             # Adicione prints para visualizar os dados retornados pela API Twitch
-            print(data)
+            #print(data)
 
             for usuario in data.get('data', []):
                 userObj = Usuario(user_id=usuario.get("id"),
@@ -170,7 +170,7 @@ class API:
                                 created_at=usuario.get("created_at"))
 
                 # Adicione prints para verificar os dados do usuário
-                print(f"Usuário: {userObj.user_id}, Login: {userObj.login}")
+                #print(f"Usuário: {userObj.user_id}, Login: {userObj.login}")
 
                 # Verifica se o usuário já foi cadastrado
                 check = DB.select_user(userObj.user_id)
@@ -179,8 +179,8 @@ class API:
                 if not check:
                     DB.insert(userObj)
                 # Se foi cadastrado, printamos uma mensagem
-                else:
-                    print(f"Usuário: {userObj.user_id} já cadastrado!")
+                #else:
+                    #print(f"Usuário: {userObj.user_id} já cadastrado!")
 
     # Adicione uma função para obter os nomes dos transmissores
     def get_broadcaster_names(self, token_acesso):
@@ -209,7 +209,7 @@ class API:
             data = response.json()
 
             # Adicione prints para visualizar os dados retornados pela API Twitch
-            print(data)
+            #print(data)
 
             # Certifique-se de converter para minúsculas antes de adicionar à lista
             batch_names = [stream.get("user_login").lower() for stream in data.get('data', [])]
@@ -219,14 +219,12 @@ class API:
             cursor = data.get('pagination', {}).get('cursor')
 
             # Adicione prints para visualizar os nomes dos transmissores do lote
-            print("Batch Broadcaster Names:", batch_names)
+            #print("Batch Broadcaster Names:", batch_names)
 
         # Adicione prints para visualizar a lista final de nomes dos transmissores
-        print("Total Broadcaster Names:", broadcaster_names)
+        #print("Total Broadcaster Names:", broadcaster_names)
 
         return broadcaster_names
-
-
 
         
     # Faz uma solicitação para obter informações sobre as streams
@@ -243,21 +241,22 @@ class API:
         response = requests.get(url, params=params, headers=headers)
         data = response.json()
 
-        print(data)  # Adicione esta linha para visualizar a estrutura dos dados
+        #print(data)  # Adicione esta linha para visualizar a estrutura dos dados
 
         for stream in data.get('data', []):
-            streamObj = Streams(stream_id=stream.get("id"),
-                                broadcaster_name=stream.get("user_name"))
-
-        # Resto do código...
-
-
+            streamObj = Streams(stream_id = stream.get("id"),
+                                broadcaster_name = stream.get("user_name"),
+                                title = stream.get("title"),
+                                started_at = stream.get("started_at"),
+                                viewer_count = stream.get("viewer_count"),
+                                stream_lang = stream.get("language"))
+ 
             # verifica se o genero já foi cadastrado
             check = DB.selectStream(streamObj.stream_id)
             streamID = streamObj.stream_id
 
             # Debug
-            print(f"Stream ID: {streamID}, Check: {check}")
+            #print(f"Stream ID: {streamID}, Check: {check}")
 
             # se não foi cadastrado, inserimos
             if not check:
@@ -286,7 +285,7 @@ class API:
             response = requests.get(url, params=params, headers=headers)
             data = response.json()
 
-            print(data)
+            #print(data)
 
             for categoria in data.get('data', []):
                 categoriaObj = Canais(category_id=categoria.get("id"),
@@ -307,17 +306,17 @@ class API:
         return DB.get_user_ids_from_users()
     
     def get_canais(self, token_acesso):
-            # Obtém os user_ids da tabela de usuários
+        # Obtém os user_ids da tabela de usuários
         user_ids_from_db = self.get_user_ids_from_database()
 
         # Verifica se há user_ids para evitar uma requisição desnecessária se a lista estiver vazia
         if user_ids_from_db:
-            print(f"User IDs from database: {user_ids_from_db}")
+            #print(f"User IDs from database: {user_ids_from_db}")
 
             url = 'https://api.twitch.tv/helix/channels'
 
             for batch in [user_ids_from_db[i:i + 100] for i in range(0, len(user_ids_from_db), 100)]:
-                print(f"Processing batch: {batch}")
+                #print(f"Processing batch: {batch}")
 
                 params = {
                     'first': 100,
@@ -332,7 +331,7 @@ class API:
                 response = requests.get(url, params=params, headers=headers)
                 data = response.json()
 
-                print(data)
+                #print(data)
 
                 for canal in data.get('data', []):
                     canalObj = Canais(
@@ -349,13 +348,13 @@ class API:
                     # se não foi cadastrado, inserimos
                     if not check:
                         result = DB.insert_channel(canalObj)
-                        if result:
-                            print(f"Canal: {canalID} inserido com sucesso!")
-                        else:
-                            print(f"Erro ao inserir o canal: {canalID}")
+                        #if result:
+                            #print(f"Canal: {canalID} inserido com sucesso!")
+                        #else:
+                            #print(f"Erro ao inserir o canal: {canalID}")
                     # se foi cadastrado, printamos uma mensagem
-                    else:
-                        print(f"Canal: {canalID} já cadastrado!")
+                    #else:
+                        #print(f"Canal: {canalID} já cadastrado!")
         else:
             print("Lista de user_ids está vazia. Nenhuma solicitação será feita.")
 
@@ -370,12 +369,12 @@ class API:
 
         # Verifica se há broadcaster_ids para evitar uma requisição desnecessária se a lista estiver vazia
         if broadcaster_ids_from_db:
-            print(f"Broadcaster IDs from database for polls: {broadcaster_ids_from_db}")
+            #print(f"Broadcaster IDs from database for polls: {broadcaster_ids_from_db}")
 
             url = 'https://api.twitch.tv/helix/polls'
 
             for batch in [broadcaster_ids_from_db[i:i + 100] for i in range(0, len(broadcaster_ids_from_db), 100)]:
-                print(f"Processing poll batch: {batch}")
+                #print(f"Processing poll batch: {batch}")
 
                 params = {
                     'broadcaster_id': batch
@@ -389,7 +388,7 @@ class API:
                 data = response.json()
 
                 # Adicione prints para visualizar os dados retornados pela API Twitch
-                print(data)
+                #print(data)
 
                 for poll_data in data.get('data', []):
                     poll_obj = Polls(
@@ -406,8 +405,8 @@ class API:
                     poll_id = poll_obj.poll_id
 
                     # Adicione prints para visualizar informações durante o processo
-                    print(f"Poll Data: {poll_data}")
-                    print(f"Poll ID: {poll_id}, Check: {check}")
+                    #print(f"Poll Data: {poll_data}")
+                    #print(f"Poll ID: {poll_id}, Check: {check}")
 
                     # Se não foi cadastrada, inserimos
                     if not check:
