@@ -1,6 +1,6 @@
 import requests
 from requests.exceptions import ConnectionError
-
+import logging
 from mapeamento import * 
 from DAO import *
 from sqlalchemy import *
@@ -79,6 +79,41 @@ class DB:
             return channel
         except:
             return 0
+        
+    @staticmethod
+    def insert_poll(obj):
+        try:
+            session = DAO.getSession()
+            DAO.insert(session, obj)
+            session.commit()
+            session.close()
+            return 1
+        except Exception as e:
+            print(f"Erro durante a inserção da enquete: {str(e)}")
+            return 0
+
+    @staticmethod
+    def select_poll(poll_id):
+        try:
+            session = DAO.getSession()
+            session.expire_on_commit = False
+            poll = DAOPolls.select(session, poll_id)
+            session.commit()
+            session.close()
+            return poll
+        except:
+            return 0
+
+    @staticmethod
+    def get_broadcaster_ids_from_canais():
+        try:
+            session = DAO.getSession()
+            channel_id = DAOChannel.get_broadcaster_ids(session)  # Assuming you have a get_broadcaster_ids method in DAOChannel
+            session.commit()
+            session.close()
+            return channel_id
+        except:
+            return []
     
 class API:
     def __init__(self):
@@ -323,3 +358,64 @@ class API:
                         print(f"Canal: {canalID} já cadastrado!")
         else:
             print("Lista de user_ids está vazia. Nenhuma solicitação será feita.")
+
+    def get_broadcaster_ids_from_database(self):
+        return DB.get_broadcaster_ids_from_canais()
+
+    def get_polls(self, token_acesso):
+        if not token_acesso:    
+            return print("Token de acesso ausente. Forneça um token válido.") 
+        # Obtém os broadcaster_ids (channel_id) da tabela de canais
+        broadcaster_ids_from_db = self.get_broadcaster_ids_from_database()
+
+        # Verifica se há broadcaster_ids para evitar uma requisição desnecessária se a lista estiver vazia
+        if broadcaster_ids_from_db:
+            print(f"Broadcaster IDs from database for polls: {broadcaster_ids_from_db}")
+
+            url = 'https://api.twitch.tv/helix/polls'
+
+            for batch in [broadcaster_ids_from_db[i:i + 100] for i in range(0, len(broadcaster_ids_from_db), 100)]:
+                print(f"Processing poll batch: {batch}")
+
+                params = {
+                    'broadcaster_id': batch
+                }
+                headers = {
+                    'Client-ID': self.client_id,
+                    'Authorization': f'Bearer {token_acesso}'
+                }
+
+                response = requests.get(url, params=params, headers=headers)
+                data = response.json()
+
+                # Adicione prints para visualizar os dados retornados pela API Twitch
+                print(data)
+
+                for poll_data in data.get('data', []):
+                    poll_obj = Polls(
+                        poll_id=poll_data.get("id"),
+                        title=poll_data.get("title"),
+                        status=poll_data.get("status"),
+                        started_at=poll_data.get("started_at"),
+                        ended_at=poll_data.get("ended_at"),
+                        broadcaster_id=poll_data.get("broadcaster_id")
+                    )
+
+                    # Verifica se a enquete já foi cadastrada
+                    check = DB.select_poll(poll_obj.poll_id)
+                    poll_id = poll_obj.poll_id
+
+                    # Adicione prints para visualizar informações durante o processo
+                    print(f"Poll Data: {poll_data}")
+                    print(f"Poll ID: {poll_id}, Check: {check}")
+
+                    # Se não foi cadastrada, inserimos
+                    if not check:
+                        result = DB.insert_poll(poll_obj)
+                        if result:
+                            print(f"Poll: {poll_id} inserida com sucesso!")
+                        else:
+                            print(f"Erro ao inserir a enquete: {poll_id}")
+                    # Se foi cadastrada, printamos uma mensagem
+                    else:
+                        print(f"Poll: {poll_id} já cadastrada!")

@@ -53,11 +53,10 @@ class Polls(Base):
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('polls_codigo_seq'::regclass)"))
     poll_id = Column(String(13))
-    title = Column(String(80), nullable=False)
+    title = Column(String(80))
     status = Column(String(10))
     started_at = Column(Date)
     ended_at = Column(Date)
-    votes = Column(Integer)
     broadcaster_id = Column(ForeignKey('canais.channel_id'))
 
     broadcaster = relationship('Canais')

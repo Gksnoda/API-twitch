@@ -52,6 +52,15 @@ class DAOChannel:
     def select(session, channel_id):
         # Exemplo: Selecionar dados da tabela de canais
         return session.query(Canais).filter_by(channel_id=channel_id).first()
+    
+    @staticmethod
+    def get_broadcaster_ids(session):
+        try:
+            # Modificar para selecionar os channel_id
+            broadcaster_ids = session.query(Canais.channel_id).all()
+            return [channel_id[0] for channel_id in broadcaster_ids]
+        except:
+            return []
 
 class DAOUser:
     @staticmethod
@@ -66,3 +75,12 @@ class DAOUser:
     def get_user_ids(session: Session):
         # Retorna uma lista de user_ids
         return [result.user_id for result in session.query(Usuario.user_id).all()]
+    
+class DAOPolls:
+    @staticmethod
+    def insert(session: Session, poll_obj: Polls):
+        session.add(poll_obj)
+
+    @staticmethod
+    def select(session: Session, poll_id: str):
+        return session.query(Polls).filter_by(poll_id=poll_id).first()

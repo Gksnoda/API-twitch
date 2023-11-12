@@ -23,6 +23,10 @@ class Controller:
             if opcao == 3:
                 token_acesso = self.API.get_app_access_token()
                 usuarios = self.API.get_users(token_acesso)
+            
+            if opcao == 4:
+                token_acesso = self.API.get_app_access_token()
+                polls = self.API.get_polls(token_acesso)
 
             if opcao == 5:
                 print("inserir")
