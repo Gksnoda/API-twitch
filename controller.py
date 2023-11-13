@@ -9,7 +9,7 @@ class Controller:
     def start(self):
         opcao = self.view.start()
 
-        while opcao != 8:
+        while opcao != 7:
             if opcao == 1:
                 token_acesso = self.API.get_app_access_token()
                 usuarios = self.API.get_users(token_acesso)
@@ -19,21 +19,18 @@ class Controller:
                 canais = self.API.get_canais(token_acesso)
 
             if opcao == 3:
-                print('Polls')
+                token_acesso = self.API.get_app_access_token()
+                streams = self.API.get_top_games(token_acesso)
 
             if opcao == 4:
                 token_acesso = self.API.get_app_access_token()
                 streams = self.API.get_streams(token_acesso)
 
             if opcao == 5:
-                token_acesso = self.API.get_app_access_token()
-                streams = self.API.get_top_games(token_acesso)
-
-            if opcao == 6:
-                print('tags')
+                print('Videos')
                 
-            if opcao == 7:
-                vprint('stream_categories')
+            if opcao == 6:
+                print('Tags')
 
             #else:
                 #print("\nOpção inválida.\n")

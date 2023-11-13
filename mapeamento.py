@@ -33,7 +33,7 @@ class Usuario(Base):
     created_at = Column(Date)
 
 
-class Canai(Base):
+class Canais(Base):
     __tablename__ = 'canais'
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('canais_codigo_seq'::regclass)"))
@@ -45,7 +45,7 @@ class Canai(Base):
     usuario = relationship('Usuario', uselist=False)
 
 
-class Video(Base):
+class Videos(Base):
     __tablename__ = 'videos'
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('videos_codigo_seq'::regclass)"))
@@ -63,7 +63,7 @@ class Video(Base):
     user = relationship('Usuario', uselist=False)
 
 
-class Stream(Base):
+class Streams(Base):
     __tablename__ = 'streams'
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('streams_codigo_seq'::regclass)"))
@@ -75,7 +75,7 @@ class Stream(Base):
     stream_lang = Column(String(15))
     category_name = Column(ForeignKey('categories.category_name'))
 
-    canai = relationship('Canai', uselist=False)
+    canai = relationship('Canais', uselist=False)
     category = relationship('Category')
 
 
@@ -87,4 +87,4 @@ class Tag(Base):
     stream_id = Column(ForeignKey('streams.stream_id'))
     tag_name = Column(String(30))
 
-    stream = relationship('Stream')
+    stream = relationship('Streams')

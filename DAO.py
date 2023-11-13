@@ -37,9 +37,9 @@ class DAOStream:
         return stream
     
     @staticmethod
-    def get_category_ids(session):
+    def get_category_names(session):
         try:
-            return [category_id[0] for category_id in session.query(Category.category_id).all()]
+            return [category_name[0] for category_name in session.query(Category.category_name).all()]
         except:
             return []
 
@@ -82,3 +82,4 @@ class DAOUser:
         # Retorna uma lista de user_ids
         return [result.user_id for result in session.query(Usuario.user_id).all()]
     
+

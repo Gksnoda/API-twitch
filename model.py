@@ -93,13 +93,13 @@ class DB:
         
 
     @staticmethod
-    def get_category_ids_from_categories():
+    def get_category_names_from_categories():
         try:
             session = DAO.getSession()
-            category_id = DAOStream.get_category_ids(session)
+            category_name = DAOStream.get_category_names(session)
             session.commit()
             session.close()
-            return category_id
+            return category_name
         except:
             return []
 
@@ -281,7 +281,7 @@ class API:
         broadcaster_ids_db = self.get_broadcaster_ids_from_database()
 
         # Obter as categorias
-        category_ids_db = self.get_category_ids_from_database()
+        category_ids_db = self.get_category_names_from_database()
 
         # Verifica se há user_ids para evitar uma requisição desnecessária se a lista estiver vazia
         if not broadcaster_ids_db or not category_ids_db:
@@ -293,7 +293,7 @@ class API:
         url = 'https://api.twitch.tv/helix/streams'
 
         for batch in [broadcaster_ids_db[i:i + 100] for i in range(0, len(broadcaster_ids_db), 100)]:
-            print(f"Processing batch: {batch}")
+            #print(f"Processing batch: {batch}")
 
             params = {
                 'first': 100,
@@ -321,7 +321,7 @@ class API:
                 # Verifica se a stream já foi cadastrada
                 check = DB.selectStream(streamObj.stream_id)
 
-                # Verifica se o nome da categoria é válido
+                # Verifica se o nome da categoria é válido (está presente na tabela "Categories")
                 if streamObj.category_name not in category_ids_db:
                     print(f"Ignorando stream {streamObj.stream_id}: Categoria inválida.")
                     continue
@@ -337,13 +337,14 @@ class API:
                 # else:
                 #    print(f"Stream: {streamID} já cadastrada!")
 
+
     # Função para obter os ids dos transmissores no banco
     def get_broadcaster_ids_from_database(self):
         return DB.get_broadcaster_ids_from_canais()
 
     # Função para obter os ids das categorias no banco
-    def get_category_ids_from_database(self):
-        return DB.get_category_ids_from_categories()
+    def get_category_names_from_database(self):
+        return DB.get_category_names_from_categories()
 
 
     # Função para obter informações das categorias (jogos)
