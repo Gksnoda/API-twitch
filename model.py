@@ -25,14 +25,14 @@ class DB:
         try:
             session = DAO.getSession()
             session.expire_on_commit = False
-            user = DAOUser.select(session, user_id)  # Assuming you have a select method in DAOUser
+            user = DAOUser.select(session, user_id) 
             session.commit()
             session.close()
             return user
         except:
             return 0
 
-
+    @staticmethod
     def selectStream(id):
         try:
             session = DAO.getSession()
@@ -81,30 +81,6 @@ class DB:
             return 0
         
     @staticmethod
-    def insert_poll(obj):
-        try:
-            session = DAO.getSession()
-            DAO.insert(session, obj)
-            session.commit()
-            session.close()
-            return 1
-        except Exception as e:
-            print(f"Erro durante a inserção da enquete: {str(e)}")
-            return 0
-
-    @staticmethod
-    def select_poll(poll_id):
-        try:
-            session = DAO.getSession()
-            session.expire_on_commit = False
-            poll = DAOPolls.select(session, poll_id)
-            session.commit()
-            session.close()
-            return poll
-        except:
-            return 0
-
-    @staticmethod
     def get_broadcaster_ids_from_canais():
         try:
             session = DAO.getSession()
@@ -114,7 +90,20 @@ class DB:
             return channel_id
         except:
             return []
-    
+        
+
+    @staticmethod
+    def get_category_ids_from_categories():
+        try:
+            session = DAO.getSession()
+            category_id = DAOStream.get_category_ids(session)
+            session.commit()
+            session.close()
+            return category_id
+        except:
+            return []
+
+
 class API:
     def __init__(self):
         self.client_id = 'qphncqmutk6rmxx5dgbrihjmxzh03d'
@@ -132,7 +121,8 @@ class API:
         data = response.json()
         return data.get('access_token')
 
-    # Altere a função get_users para chamar get_broadcaster_names e imprimir os nomes retornados
+
+    # Função get_users para chamar get_broadcaster_names e imprimir os nomes retornados
     def get_users(self, token_acesso):
         # Chame a função para obter os nomes dos transmissores
         broadcaster_names = self.get_broadcaster_names(token_acesso)
@@ -182,7 +172,7 @@ class API:
                 #else:
                     #print(f"Usuário: {userObj.user_id} já cadastrado!")
 
-    # Adicione uma função para obter os nomes dos transmissores
+    # Função para obter os nomes dos transmissores
     def get_broadcaster_names(self, token_acesso):
         total_streams = 4000
         batch_size = 100
@@ -226,85 +216,8 @@ class API:
 
         return broadcaster_names
 
-        
-    # Faz uma solicitação para obter informações sobre as streams
-    def get_streams(self, token_acesso):
-        url = 'https://api.twitch.tv/helix/streams'
-        params = {
-            'first': 10,
-            'language': 'pt'
-        }
-        headers = {
-            'Client-ID': self.client_id,
-            'Authorization': f'Bearer {token_acesso}'
-        }
-        response = requests.get(url, params=params, headers=headers)
-        data = response.json()
-
-        #print(data)  # Adicione esta linha para visualizar a estrutura dos dados
-
-        for stream in data.get('data', []):
-            streamObj = Streams(stream_id = stream.get("id"),
-                                broadcaster_name = stream.get("user_name"),
-                                title = stream.get("title"),
-                                started_at = stream.get("started_at"),
-                                viewer_count = stream.get("viewer_count"),
-                                stream_lang = stream.get("language"))
- 
-            # verifica se o genero já foi cadastrado
-            check = DB.selectStream(streamObj.stream_id)
-            streamID = streamObj.stream_id
-
-            # Debug
-            #print(f"Stream ID: {streamID}, Check: {check}")
-
-            # se não foi cadastrado, inserimos
-            if not check:
-                DB.insert(streamObj)
-            # se foi cadastrado, printamos uma mensagem
-            else:
-                print(f"Stream: {streamID} já cadastrada!")
-
-    def get_categorias(self, token_acesso):
-        # Lista de consultas de pesquisa que você deseja realizar
-        consultas = ['#archery', 'angel of death', ...]  # Adicione suas consultas aqui
-
-        for consulta in consultas:
-            # Construa a URL com a consulta atual
-            url = 'https://api.twitch.tv/helix/search/categories'
-            params = {
-                'first': 100,
-                'language': 'pt',
-                'query': consulta  # Adicione a consulta como um parâmetro
-            }
-            headers = {
-                'Client-ID': self.client_id,
-                'Authorization': f'Bearer {token_acesso}'
-            }
-
-            response = requests.get(url, params=params, headers=headers)
-            data = response.json()
-
-            #print(data)
-
-            for categoria in data.get('data', []):
-                categoriaObj = Canais(category_id=categoria.get("id"),
-                                    category_name=categoria.get("name"))
-
-                # verifica se o canal já foi cadastrado
-                check = DB.selectChannel(categoriaObj.category_id)
-                categoriaID = categoriaObj.category_id
-
-                # se não foi cadastrado, inserimos
-                if not check:
-                    DB.insert(categoriaObj)
-                # se foi cadastrado, printamos uma mensagem
-                else:
-                    print(f"Canal: {categoriaID} já cadastrada!")
-                    
-    def get_user_ids_from_database(self):
-        return DB.get_user_ids_from_users()
     
+    # Função para obter os canais da API
     def get_canais(self, token_acesso):
         # Obtém os user_ids da tabela de usuários
         user_ids_from_db = self.get_user_ids_from_database()
@@ -320,7 +233,6 @@ class API:
 
                 params = {
                     'first': 100,
-                    'language': 'pt',
                     'broadcaster_id': batch
                 }
                 headers = {
@@ -358,63 +270,117 @@ class API:
         else:
             print("Lista de user_ids está vazia. Nenhuma solicitação será feita.")
 
+    # Função para obter os ids dos usuarios no banco
+    def get_user_ids_from_database(self):
+        return DB.get_user_ids_from_users()
+    
+
+    # Faz uma solicitação para obter informações sobre as streams
+    def get_streams(self, token_acesso):
+        # Chame a função para obter os nomes dos transmissores
+        broadcaster_ids_db = self.get_broadcaster_ids_from_database()
+
+        # Obter as categorias
+        category_ids_db = self.get_category_ids_from_database()
+
+        # Verifica se há user_ids para evitar uma requisição desnecessária se a lista estiver vazia
+        if not broadcaster_ids_db or not category_ids_db:
+            print("Lista de broadcaster_ids ou category_ids está vazia. Nenhuma solicitação será feita.")
+            return
+
+        #print(f"Broadcaster IDs from database: {broadcaster_ids_db}")
+
+        url = 'https://api.twitch.tv/helix/streams'
+
+        for batch in [broadcaster_ids_db[i:i + 100] for i in range(0, len(broadcaster_ids_db), 100)]:
+            print(f"Processing batch: {batch}")
+
+            params = {
+                'first': 100,
+                'user_id': batch
+            }
+            headers = {
+                'Client-ID': self.client_id,
+                'Authorization': f'Bearer {token_acesso}'
+            }
+
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
+
+            for stream in data.get('data', []):
+                streamObj = Streams(
+                    stream_id = stream.get("id"),
+                    broadcaster_name = stream.get("user_name"),
+                    title = stream.get("title"),
+                    started_at = stream.get("started_at"),
+                    viewer_count = stream.get("viewer_count"),
+                    stream_lang = stream.get("language"),
+                    category_name = stream.get("game_name")
+                )
+
+                # Verifica se a stream já foi cadastrada
+                check = DB.selectStream(streamObj.stream_id)
+
+                # Verifica se o nome da categoria é válido
+                if streamObj.category_name not in category_ids_db:
+                    print(f"Ignorando stream {streamObj.stream_id}: Categoria inválida.")
+                    continue
+
+                # Debug
+                # print(f"Stream ID: {streamID}, Check: {check}")
+
+                # Se não foi cadastrado, inserimos
+                if not check:
+                    result = DB.insert(streamObj)
+                    # DB.insert(streamObj)
+                # Se foi cadastrado, printamos uma mensagem
+                # else:
+                #    print(f"Stream: {streamID} já cadastrada!")
+
+    # Função para obter os ids dos transmissores no banco
     def get_broadcaster_ids_from_database(self):
         return DB.get_broadcaster_ids_from_canais()
 
-    def get_polls(self, token_acesso):
-        if not token_acesso:    
-            return print("Token de acesso ausente. Forneça um token válido.") 
-        # Obtém os broadcaster_ids (channel_id) da tabela de canais
-        broadcaster_ids_from_db = self.get_broadcaster_ids_from_database()
+    # Função para obter os ids das categorias no banco
+    def get_category_ids_from_database(self):
+        return DB.get_category_ids_from_categories()
 
-        # Verifica se há broadcaster_ids para evitar uma requisição desnecessária se a lista estiver vazia
-        if broadcaster_ids_from_db:
-            #print(f"Broadcaster IDs from database for polls: {broadcaster_ids_from_db}")
 
-            url = 'https://api.twitch.tv/helix/polls'
+    # Função para obter informações das categorias (jogos)
+    def get_top_games(self, token_acesso):
+        # Construa a URL com a consulta atual
+        url = 'https://api.twitch.tv/helix/games/top'
+        params = {
+            'first': 100,
+        }
+        headers = {
+            'Client-ID': self.client_id,
+            'Authorization': f'Bearer {token_acesso}'
+        }
 
-            for batch in [broadcaster_ids_from_db[i:i + 100] for i in range(0, len(broadcaster_ids_from_db), 100)]:
-                #print(f"Processing poll batch: {batch}")
+        response = requests.get(url, params=params, headers=headers)
+        data = response.json()
 
-                params = {
-                    'broadcaster_id': batch
-                }
-                headers = {
-                    'Client-ID': self.client_id,
-                    'Authorization': f'Bearer {token_acesso}'
-                }
+        #print(data)
 
-                response = requests.get(url, params=params, headers=headers)
-                data = response.json()
+        for categoria in data.get('data', []):
+            categoriaObj = Category(category_id=categoria.get("id"),
+                                    category_name=categoria.get("name"))
 
-                # Adicione prints para visualizar os dados retornados pela API Twitch
-                #print(data)
+            # verifica se o canal já foi cadastrado
+            check = DB.selectChannel(categoriaObj.category_id)
+            categoriaID = categoriaObj.category_id
 
-                for poll_data in data.get('data', []):
-                    poll_obj = Polls(
-                        poll_id=poll_data.get("id"),
-                        title=poll_data.get("title"),
-                        status=poll_data.get("status"),
-                        started_at=poll_data.get("started_at"),
-                        ended_at=poll_data.get("ended_at"),
-                        broadcaster_id=poll_data.get("broadcaster_id")
-                    )
+            # se não foi cadastrado, inserimos
+            if not check:
+                DB.insert(categoriaObj)
+            # se foi cadastrado, printamos uma mensagem
+            else:
+                print(f"Canal: {categoriaID} já cadastrada!")
+      
 
-                    # Verifica se a enquete já foi cadastrada
-                    check = DB.select_poll(poll_obj.poll_id)
-                    poll_id = poll_obj.poll_id
+    
 
-                    # Adicione prints para visualizar informações durante o processo
-                    #print(f"Poll Data: {poll_data}")
-                    #print(f"Poll ID: {poll_id}, Check: {check}")
 
-                    # Se não foi cadastrada, inserimos
-                    if not check:
-                        result = DB.insert_poll(poll_obj)
-                        if result:
-                            print(f"Poll: {poll_id} inserida com sucesso!")
-                        else:
-                            print(f"Erro ao inserir a enquete: {poll_id}")
-                    # Se foi cadastrada, printamos uma mensagem
-                    else:
-                        print(f"Poll: {poll_id} já cadastrada!")
+
+

@@ -26,7 +26,8 @@ class Controller:
                 streams = self.API.get_streams(token_acesso)
 
             if opcao == 5:
-                print('categories')
+                token_acesso = self.API.get_app_access_token()
+                streams = self.API.get_top_games(token_acesso)
 
             if opcao == 6:
                 print('tags')

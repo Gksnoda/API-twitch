@@ -36,6 +36,13 @@ class DAOStream:
         stream = session.query(Streams).filter(Streams.id == id).first()
         return stream
     
+    @staticmethod
+    def get_category_ids(session):
+        try:
+            return [category_id[0] for category_id in session.query(Category.category_id).all()]
+        except:
+            return []
+
 class DAOChannel:
     @staticmethod
     def insert(session, canal_obj):
@@ -57,8 +64,7 @@ class DAOChannel:
     def get_broadcaster_ids(session):
         try:
             # Modificar para selecionar os channel_id
-            broadcaster_ids = session.query(Canais.channel_id).all()
-            return [channel_id[0] for channel_id in broadcaster_ids]
+            return [channel_id[0] for channel_id in session.query(Canais.channel_id).all()]
         except:
             return []
 
@@ -76,11 +82,3 @@ class DAOUser:
         # Retorna uma lista de user_ids
         return [result.user_id for result in session.query(Usuario.user_id).all()]
     
-class DAOPolls:
-    @staticmethod
-    def insert(session: Session, poll_obj: Polls):
-        session.add(poll_obj)
-
-    @staticmethod
-    def select(session: Session, poll_id: str):
-        return session.query(Polls).filter_by(poll_id=poll_id).first()

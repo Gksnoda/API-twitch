@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -69,26 +69,14 @@ class Stream(Base):
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('streams_codigo_seq'::regclass)"))
     stream_id = Column(String(13), unique=True)
     broadcaster_name = Column(ForeignKey('canais.broadcaster_name'), nullable=False, unique=True)
-    title = Column(String(140))
+    title = Column(String(140), nullable=False)
     started_at = Column(Date)
     viewer_count = Column(Integer)
     stream_lang = Column(String(15))
+    category_name = Column(ForeignKey('categories.category_name'))
 
     canai = relationship('Canai', uselist=False)
-
-
-class StreamCategory(Base):
-    __tablename__ = 'stream_categories'
-    __table_args__ = (
-        UniqueConstraint('stream_id', 'category_id'),
-    )
-
-    codigo = Column(Integer, primary_key=True, server_default=text("nextval('stream_categories_codigo_seq'::regclass)"))
-    stream_id = Column(ForeignKey('streams.stream_id'))
-    category_id = Column(ForeignKey('categories.category_id'))
-
     category = relationship('Category')
-    stream = relationship('Stream')
 
 
 class Tag(Base):
