@@ -52,8 +52,10 @@ class DB:
             session.commit()
             session.close()
             return user_ids
-        except:
+        except Exception as e:
+            print(f"Erro para pegar User_id: {str(e)}")
             return []
+
 
     # Adicione uma função para inserir canais na tabela
     @staticmethod
@@ -103,6 +105,29 @@ class DB:
         except:
             return []
 
+    @staticmethod
+    def selectVideo(video_id):
+        try:
+            session = DAO.getSession()
+            session.expire_on_commit = False
+            video = DAOVideo.select(session, video_id)  # Assuming you have a select method in DAOVideo
+            session.commit()
+            session.close()
+            return video
+        except:
+            return 0
+
+    @staticmethod
+    def insert_video(video_obj):
+        try:
+            session = DAO.getSession()
+            DAOVideo.insert(session, video_obj)  # Assuming you have an insert method in DAOVideo
+            session.commit()
+            session.close()
+            return 1
+        except Exception as e:
+            print(f"Error during video insertion: {str(e)}")
+            return 0
 
 class API:
     def __init__(self):
@@ -379,7 +404,50 @@ class API:
             else:
                 print(f"Canal: {categoriaID} já cadastrada!")
       
+    def get_videos(self, access_token):
+        user_ids_from_db = self.get_user_ids_from_database()
 
+        if user_ids_from_db:
+            url = 'https://api.twitch.tv/helix/videos'
+
+            for batch in [user_ids_from_db[i:i + 100] for i in range(0, len(user_ids_from_db), 100)]:
+                params = {
+                    'user_id': batch
+                }
+                headers = {
+                    'Client-ID': self.client_id,
+                    'Authorization': f'Bearer {access_token}'
+                }
+
+                response = requests.get(url, params=params, headers=headers)
+                data = response.json()
+
+                for video in data.get('data', []):
+                    videoObj = Videos(
+                        id=video.get('id'),
+                        stream_id=video.get('stream_id'),
+                        user_id=video.get('user_id'),
+                        title=video.get('title'),
+                        created_at=video.get('created_at'),
+                        published_at=video.get('published_at'),
+                        view_count=video.get('view_count'),
+                        language=video.get('language'),
+                        type=video.get('type'),
+                        duration=video.get('duration')
+                    )
+
+                
+                    check = DB.selectChannel(videoObj.id)
+                    canalID = videoObj.id
+
+                    # se não foi cadastrado, inserimos
+                    if not check:
+                        result = DB.insert_channel(videoObj)
+                    # Save the video information to the database
+                    # You should implement your own database interaction logic here
+                    # Example: session.add(videoObj)
+        else:
+            print("List of user_ids is empty. No requests will be made.")
     
 
 

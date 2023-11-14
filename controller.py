@@ -20,14 +20,15 @@ class Controller:
 
             if opcao == 3:
                 token_acesso = self.API.get_app_access_token()
-                streams = self.API.get_top_games(token_acesso)
+                top_games = self.API.get_top_games(token_acesso)
 
             if opcao == 4:
                 token_acesso = self.API.get_app_access_token()
                 streams = self.API.get_streams(token_acesso)
 
             if opcao == 5:
-                print('Videos')
+                token_acesso = self.API.get_app_access_token()
+                videos = self.API.get_videos(token_acesso)
                 
             if opcao == 6:
                 print('Tags')

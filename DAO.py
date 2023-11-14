@@ -5,7 +5,7 @@ from mapeamento import *
 from urllib.parse import quote_plus
 
 # Substitua 'sua_senha' pela senha correta do seu banco de dados
-senha_codificada = quote_plus('root')
+senha_codificada = quote_plus('@Senha123')
 
 # Use a senha codificada na URL de conexão
 
@@ -83,3 +83,17 @@ class DAOUser:
         return [result.user_id for result in session.query(Usuario.user_id).all()]
     
 
+class DAOVideo:
+    @staticmethod
+    def insert(session, video_obj):
+        try:
+            session.add(video_obj)
+        except Exception as e:
+            print(f"Erro durante a inserção: {str(e)}")
+
+    @staticmethod
+    def select(session, video_id):
+        try:
+            return session.query(Videos).filter_by(id=video_id).first()
+        except Exception as e:
+            print(f"Erro durante a seleção: {str(e)}")
