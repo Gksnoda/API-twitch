@@ -434,8 +434,8 @@ class API:
                     )
 
                 
-                    check = DB.selectChannel(videoObj.id)
-                    canalID = videoObj.id
+                    check = DB.selectChannel(videoObj.video_id)
+                    canalID = videoObj.video_id
 
                     # se não foi cadastrado, inserimos
                     if not check:
