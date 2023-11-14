@@ -5,7 +5,7 @@ from mapeamento import *
 from urllib.parse import quote_plus
 
 # Substitua 'sua_senha' pela senha correta do seu banco de dados
-senha_codificada = quote_plus('@Senha123')
+senha_codificada = quote_plus('root')
 
 # Use a senha codificada na URL de conexão
 
@@ -13,7 +13,7 @@ senha_codificada = quote_plus('@Senha123')
 class DAO():
     # Iniciando a sessão com o banco de dados
     def getSession():
-        engine = create_engine(f"postgresql+psycopg2://postgres:{senha_codificada}@localhost:5432/BD2_trabalho_Twitch")
+        engine = create_engine(f"postgresql+psycopg2://postgres:{senha_codificada}@localhost:5432/BD2_Twitch")
         Session = sessionmaker(bind=engine)
         session = Session()
         return session

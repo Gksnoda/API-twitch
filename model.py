@@ -181,7 +181,6 @@ class API:
                                 user_type=usuario.get("type"),
                                 broadcaster_type=usuario.get("broadcaster_type"),
                                 description=usuario.get("description"),
-                                email=usuario.get("email"),
                                 created_at=usuario.get("created_at"))
 
                 # Adicione prints para verificar os dados do usuário
@@ -274,8 +273,7 @@ class API:
                     canalObj = Canais(
                         channel_id=canal.get("broadcaster_id"),
                         broadcaster_name=canal.get("broadcaster_name"),
-                        broadcaster_lang=canal.get("broadcaster_language"),
-                        game_name=canal.get("game_name")
+                        broadcaster_lang=canal.get("broadcaster_language")
                     )
 
                     # verifica se o canal já foi cadastrado
@@ -424,15 +422,14 @@ class API:
 
                 for video in data.get('data', []):
                     videoObj = Videos(
-                        id=video.get('id'),
-                        stream_id=video.get('stream_id'),
+                        video_id=video.get('id'),
                         user_id=video.get('user_id'),
                         title=video.get('title'),
                         created_at=video.get('created_at'),
                         published_at=video.get('published_at'),
                         view_count=video.get('view_count'),
-                        language=video.get('language'),
-                        type=video.get('type'),
+                        video_language=video.get('language'),
+                        video_type=video.get('type'),
                         duration=video.get('duration')
                     )
 

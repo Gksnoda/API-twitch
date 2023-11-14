@@ -9,9 +9,8 @@ class View():
         print("3. Popular a tabela 'Categories'")
         print("4. Popular a tabela 'Streams'")
         print("5. Popular a tabela 'Videos'")
-        print("6. Popular a tabela 'Tags'")
-        print("7. Sair")
+        print("6. Sair")
 
         # Pegar escolha do usuário
-        opcao = int(input("Digite o número da opção desejada: "))
+        opcao = int(input("\nDigite o número da opção desejada: "))
         return opcao

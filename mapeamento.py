@@ -29,7 +29,6 @@ class Usuario(Base):
     user_type = Column(String(10))
     broadcaster_type = Column(String(10))
     description = Column(Text)
-    email = Column(String(30), unique=True)
     created_at = Column(Date)
 
 
@@ -37,10 +36,9 @@ class Canais(Base):
     __tablename__ = 'canais'
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('canais_codigo_seq'::regclass)"))
-    channel_id = Column(String(13), unique=True)
-    broadcaster_name = Column(ForeignKey('usuarios.display_name'), unique=True)
+    channel_id = Column(String(13), nullable=False, unique=True)
+    broadcaster_name = Column(ForeignKey('usuarios.display_name'), nullable=False, unique=True)
     broadcaster_lang = Column(String(15))
-    game_name = Column(String(50))
 
     usuario = relationship('Usuario', uselist=False)
 
@@ -49,18 +47,17 @@ class Videos(Base):
     __tablename__ = 'videos'
 
     codigo = Column(Integer, primary_key=True, server_default=text("nextval('videos_codigo_seq'::regclass)"))
-    id = Column(String(13))
-    stream_id = Column(String(255))
-    user_id = Column(ForeignKey('usuarios.user_id'))
-    title = Column(Text)
+    video_id = Column(String(13), nullable=False, unique=True)
+    user_id = Column(ForeignKey('usuarios.user_id'), nullable=False)
+    title = Column(String(140), nullable=False)
     created_at = Column(DateTime)
     published_at = Column(DateTime)
     view_count = Column(Integer)
-    language = Column(String(5))
-    type = Column(String(15))
+    video_language = Column(String(5))
+    video_type = Column(String(15))
     duration = Column(String(10))
 
-    user = relationship('Usuario', uselist=False)
+    user = relationship('Usuario')
 
 
 class Streams(Base):
@@ -77,14 +74,3 @@ class Streams(Base):
 
     canai = relationship('Canais', uselist=False)
     category = relationship('Category')
-
-
-class Tag(Base):
-    __tablename__ = 'tags'
-
-    codigo = Column(Integer, primary_key=True, server_default=text("nextval('tags_codigo_seq'::regclass)"))
-    tag_id = Column(String(20), nullable=False, unique=True)
-    stream_id = Column(ForeignKey('streams.stream_id'))
-    tag_name = Column(String(30))
-
-    stream = relationship('Streams')
