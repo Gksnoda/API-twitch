@@ -33,44 +33,6 @@ class DB:
             return 0
 
     @staticmethod
-    def selectStream(id):
-        try:
-            session = DAO.getSession()
-            session.expire_on_commit = False
-            stream = DAOStream.select(session, id)
-            session.commit()
-            session.close()
-            return stream
-        except:
-            return 0
-        
-    @staticmethod
-    def get_user_ids_from_users():
-        try:
-            session = DAO.getSession()
-            user_ids = DAOUser.get_user_ids(session)  # Assuming you have a get_user_ids method in DAOUser
-            session.commit()
-            session.close()
-            return user_ids
-        except Exception as e:
-            print(f"Erro para pegar User_id: {str(e)}")
-            return []
-
-
-    # Adicione uma função para inserir canais na tabela
-    @staticmethod
-    def insert_channel(obj):
-        try:
-            session = DAO.getSession()
-            DAO.insert(session, obj)  # Assuming you have an insert method in DAO
-            session.commit()
-            session.close()
-            return 1
-        except Exception as e:
-            print(f"Erro durante a inserção do canal: {str(e)}")
-            return 0
-
-    @staticmethod
     def selectChannel(channel_id):
         try:
             session = DAO.getSession()
@@ -83,28 +45,17 @@ class DB:
             return 0
         
     @staticmethod
-    def get_broadcaster_ids_from_canais():
+    def selectStream(id):
         try:
             session = DAO.getSession()
-            channel_id = DAOChannel.get_broadcaster_ids(session)  # Assuming you have a get_broadcaster_ids method in DAOChannel
+            session.expire_on_commit = False
+            stream = DAOStream.select(session, id)
             session.commit()
             session.close()
-            return channel_id
+            return stream
         except:
-            return []
+            return 0
         
-
-    @staticmethod
-    def get_category_names_from_categories():
-        try:
-            session = DAO.getSession()
-            category_name = DAOStream.get_category_names(session)
-            session.commit()
-            session.close()
-            return category_name
-        except:
-            return []
-
     @staticmethod
     def selectVideo(video_id):
         try:
@@ -118,16 +69,55 @@ class DB:
             return 0
 
     @staticmethod
-    def insert_video(video_obj):
+    def selectCategory(channel_id):
         try:
             session = DAO.getSession()
-            DAOVideo.insert(session, video_obj)  # Assuming you have an insert method in DAOVideo
+            session.expire_on_commit = False
+            category = DAOCategory.select(session, channel_id)
             session.commit()
             session.close()
-            return 1
-        except Exception as e:
-            print(f"Error during video insertion: {str(e)}")
+            return category
+        except:
             return 0
+        
+
+    # Obtém os ids dos usuários já cadastrados no banco
+    @staticmethod
+    def get_user_ids_from_users():
+        try:
+            session = DAO.getSession()
+            user_ids = DAOUser.get_user_ids(session)  # Assuming you have a get_user_ids method in DAOUser
+            session.commit()
+            session.close()
+            return user_ids
+        except Exception as e:
+            print(f"Erro para pegar User_id: {str(e)}")
+            return []
+
+    # Obtém os ids dos canais já cadastrados no banco
+    @staticmethod
+    def get_broadcaster_ids_from_canais():
+        try:
+            session = DAO.getSession()
+            channel_id = DAOChannel.get_broadcaster_ids(session)  # Assuming you have a get_broadcaster_ids method in DAOChannel
+            session.commit()
+            session.close()
+            return channel_id
+        except:
+            return []
+        
+    # Obtém os nomes das categorias já cadastradas no banco
+    @staticmethod
+    def get_category_names_from_categories():
+        try:
+            session = DAO.getSession()
+            category_name = DAOCategory.get_category_names(session)
+            session.commit()
+            session.close()
+            return category_name
+        except:
+            return []
+
 
 class API:
     def __init__(self):
@@ -171,9 +161,6 @@ class API:
             response = requests.get(url, params=params, headers=headers)
             data = response.json()
 
-            # Adicione prints para visualizar os dados retornados pela API Twitch
-            #print(data)
-
             for usuario in data.get('data', []):
                 userObj = Usuario(user_id=usuario.get("id"),
                                 login=usuario.get("login"),
@@ -210,7 +197,6 @@ class API:
         for _ in range(total_streams // batch_size):
             params = {
                 'first': batch_size,
-                'language': 'pt',
                 'after': cursor  # Adiciona o cursor à requisição para obter os próximos registros
             }
 
@@ -244,7 +230,7 @@ class API:
     # Função para obter os canais da API
     def get_canais(self, token_acesso):
         # Obtém os user_ids da tabela de usuários
-        user_ids_from_db = self.get_user_ids_from_database()
+        user_ids_from_db = DB.get_user_ids_from_users()
 
         # Verifica se há user_ids para evitar uma requisição desnecessária se a lista estiver vazia
         if user_ids_from_db:
@@ -267,8 +253,6 @@ class API:
                 response = requests.get(url, params=params, headers=headers)
                 data = response.json()
 
-                #print(data)
-
                 for canal in data.get('data', []):
                     canalObj = Canais(
                         channel_id=canal.get("broadcaster_id"),
@@ -282,7 +266,7 @@ class API:
 
                     # se não foi cadastrado, inserimos
                     if not check:
-                        result = DB.insert_channel(canalObj)
+                        result = DB.insert(canalObj)
                         #if result:
                             #print(f"Canal: {canalID} inserido com sucesso!")
                         #else:
@@ -293,18 +277,14 @@ class API:
         else:
             print("Lista de user_ids está vazia. Nenhuma solicitação será feita.")
 
-    # Função para obter os ids dos usuarios no banco
-    def get_user_ids_from_database(self):
-        return DB.get_user_ids_from_users()
-    
 
     # Faz uma solicitação para obter informações sobre as streams
     def get_streams(self, token_acesso):
         # Chame a função para obter os nomes dos transmissores
-        broadcaster_ids_db = self.get_broadcaster_ids_from_database()
+        broadcaster_ids_db = DB.get_broadcaster_ids_from_canais()
 
         # Obter as categorias
-        category_ids_db = self.get_category_names_from_database()
+        category_ids_db = DB.get_category_names_from_categories()
 
         # Verifica se há user_ids para evitar uma requisição desnecessária se a lista estiver vazia
         if not broadcaster_ids_db or not category_ids_db:
@@ -361,15 +341,6 @@ class API:
                 #    print(f"Stream: {streamID} já cadastrada!")
 
 
-    # Função para obter os ids dos transmissores no banco
-    def get_broadcaster_ids_from_database(self):
-        return DB.get_broadcaster_ids_from_canais()
-
-    # Função para obter os ids das categorias no banco
-    def get_category_names_from_database(self):
-        return DB.get_category_names_from_categories()
-
-
     # Função para obter informações das categorias (jogos)
     def get_top_games(self, token_acesso):
         # Construa a URL com a consulta atual
@@ -385,14 +356,12 @@ class API:
         response = requests.get(url, params=params, headers=headers)
         data = response.json()
 
-        #print(data)
-
         for categoria in data.get('data', []):
             categoriaObj = Category(category_id=categoria.get("id"),
                                     category_name=categoria.get("name"))
 
             # verifica se o canal já foi cadastrado
-            check = DB.selectChannel(categoriaObj.category_id)
+            check = DB.selectCategory(categoriaObj.category_id)
             categoriaID = categoriaObj.category_id
 
             # se não foi cadastrado, inserimos
@@ -402,8 +371,10 @@ class API:
             else:
                 print(f"Canal: {categoriaID} já cadastrada!")
       
+
+    # Função para obter informações dos Videos
     def get_videos(self, access_token):
-        user_ids_from_db = self.get_user_ids_from_database()
+        user_ids_from_db = DB.get_user_ids_from_users()
 
         if user_ids_from_db:
             url = 'https://api.twitch.tv/helix/videos'
@@ -434,12 +405,12 @@ class API:
                     )
 
                 
-                    check = DB.selectChannel(videoObj.video_id)
+                    check = DB.selectVideo(videoObj.video_id)
                     canalID = videoObj.video_id
 
                     # se não foi cadastrado, inserimos
                     if not check:
-                        result = DB.insert_channel(videoObj)
+                        result = DB.insert(videoObj)
                     # Save the video information to the database
                     # You should implement your own database interaction logic here
                     # Example: session.add(videoObj)
