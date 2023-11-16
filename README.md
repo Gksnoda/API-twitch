@@ -1,10 +1,20 @@
-# API-twitch
-Scrip em Python, feito utilizando MVC + DAO, para fazer requisições para a API da Twitch, e armazenar os resultados obtidos em um banco de dados.
+# API-Twitch
 
+Trabalho desenvolvido para a disciplina COM231.
+
+Scrip em Python, feito utilizando MVC + DAO, para fazer requisições para a API da Twitch, e armazenar os resultados obtidos em um banco de dados.
 Para desenvolver o trabalho, utilizamos SQLAlchemy com o driver Psycopg (Driver mais popular em Python para PostgreSQL).
 
+       
+## Instalações
+Para instalar o SQLAlchemy, executar no terminal: **pip install SQLAlchemy**
 
-Trabalho desenvolvido por:
+Para instalar o Psycop (nesse caso, Psycopg2), executar no terminal: **pip install psycopg2**
+
+Para efetuar o mapeamento do banco de dados: **pip install sqlacodegen**
+
+     
+## Trabalho desenvolvido por:
 
   Gustavo Noda
   
