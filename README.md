@@ -6,6 +6,9 @@ Para desenvolver o trabalho, utilizamos SQLAlchemy com o driver Psycopg (Driver 
 
 Trabalho desenvolvido por:
   Gustavo Noda
+  
   Giulia Garcia
+  
   Guilherme Nascimento
+  
   Tales Oliveira
