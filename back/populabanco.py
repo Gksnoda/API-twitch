@@ -1,7 +1,7 @@
 import requests
 from requests.exceptions import ConnectionError
 import logging
-from mapeamento import * 
+from model import * 
 from DAO import *
 from sqlalchemy import *
 from datetime import datetime
@@ -121,7 +121,7 @@ class DB:
 
 class API:
     def __init__(self):
-        self.client_id = 'qphncqmutk6rmxx5dgbrihjmxzh03d'
+        self.client_id = 'qphncqmutk6rmxx5dgbrihjmxzh03d' 
         self.client_secret = 'zozuslb1mq6vfph841e9v5wpcjm73f'
 
     # Obter o token de acesso
@@ -137,9 +137,7 @@ class API:
         return data.get('access_token')
 
 
-    # Função get_users para chamar get_broadcaster_names e imprimir os nomes retornados
     def get_users(self, token_acesso):
-        # Chame a função para obter os nomes dos transmissores
         broadcaster_names = self.get_broadcaster_names(token_acesso)
 
         # Divida a lista de logins em lotes de 100
@@ -148,7 +146,6 @@ class API:
         for batch in batches:
             url = 'https://api.twitch.tv/helix/users'
             
-            # Corrija o parâmetro para aceitar uma lista de logins
             params = {
                 'login': batch
             }
@@ -170,7 +167,6 @@ class API:
                                 description=usuario.get("description"),
                                 created_at=usuario.get("created_at"))
 
-                # Adicione prints para verificar os dados do usuário
                 #print(f"Usuário: {userObj.user_id}, Login: {userObj.login}")
 
                 # Verifica se o usuário já foi cadastrado
@@ -185,7 +181,7 @@ class API:
 
     # Função para obter os nomes dos transmissores
     def get_broadcaster_names(self, token_acesso):
-        total_streams = 4000
+        total_streams = 100
         batch_size = 100
         broadcaster_names = []
 
@@ -197,7 +193,7 @@ class API:
         for _ in range(total_streams // batch_size):
             params = {
                 'first': batch_size,
-                'after': cursor  # Adiciona o cursor à requisição para obter os próximos registros
+                'after': cursor  # cursor à requisição para obter os próximos registros
             }
 
             headers = {
@@ -208,26 +204,21 @@ class API:
             response = requests.get(url, params=params, headers=headers)
             data = response.json()
 
-            # Adicione prints para visualizar os dados retornados pela API Twitch
             #print(data)
 
-            # Certifique-se de converter para minúsculas antes de adicionar à lista
             batch_names = [stream.get("user_login").lower() for stream in data.get('data', [])]
             broadcaster_names.extend(batch_names)
 
             # Atualiza o cursor para a próxima página de resultados
             cursor = data.get('pagination', {}).get('cursor')
 
-            # Adicione prints para visualizar os nomes dos transmissores do lote
             #print("Batch Broadcaster Names:", batch_names)
 
-        # Adicione prints para visualizar a lista final de nomes dos transmissores
         #print("Total Broadcaster Names:", broadcaster_names)
 
         return broadcaster_names
 
     
-    # Função para obter os canais da API
     def get_canais(self, token_acesso):
         # Obtém os user_ids da tabela de usuários
         user_ids_from_db = DB.get_user_ids_from_users()
@@ -267,13 +258,13 @@ class API:
                     # se não foi cadastrado, inserimos
                     if not check:
                         result = DB.insert(canalObj)
-                        #if result:
-                            #print(f"Canal: {canalID} inserido com sucesso!")
-                        #else:
-                            #print(f"Erro ao inserir o canal: {canalID}")
+                        if result:
+                            print(f"Canal: {canalID} inserido com sucesso!")
+                        else:
+                            print(f"Erro ao inserir o canal: {canalID}")
                     # se foi cadastrado, printamos uma mensagem
-                    #else:
-                        #print(f"Canal: {canalID} já cadastrado!")
+                    else:
+                        print(f"Canal: {canalID} já cadastrado!")
         else:
             print("Lista de user_ids está vazia. Nenhuma solicitação será feita.")
 
@@ -372,7 +363,6 @@ class API:
                 print(f"Canal: {categoriaID} já cadastrada!")
       
 
-    # Função para obter informações dos Videos
     def get_videos(self, access_token):
         user_ids_from_db = DB.get_user_ids_from_users()
 
@@ -411,9 +401,7 @@ class API:
                     # se não foi cadastrado, inserimos
                     if not check:
                         result = DB.insert(videoObj)
-                    # Save the video information to the database
-                    # You should implement your own database interaction logic here
-                    # Example: session.add(videoObj)
+
         else:
             print("List of user_ids is empty. No requests will be made.")
     

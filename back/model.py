@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, String, Text, text
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, ForeignKey, Integer, String,Table, Text, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -74,3 +74,62 @@ class Streams(Base):
 
     canai = relationship('Canais', uselist=False)
     category = relationship('Category')
+
+
+t_relatorio_videos = Table(
+    'relatorio_videos', metadata,
+    Column('codigo', Integer),
+    Column('video_id', String(13)),
+    Column('user_id', String(13), ForeignKey('usuarios.user_id')),
+    Column('title', String(140)),
+    Column('created_at', DateTime),
+    Column('published_at', DateTime),
+    Column('view_count', Integer),
+    Column('video_language', String(5)),
+    Column('video_type', String(15)),
+    Column('duration', String(10)),
+    schema='public'
+)
+
+t_relatorios_streams = Table(
+    'relatorios_streams', metadata,
+    Column('codigo', Integer),
+    Column('stream_id', String(13), unique=True),
+    Column('broadcaster_name', String(30), ForeignKey('canais.broadcaster_name'), nullable=False),
+    Column('title', String(140), nullable=False),
+    Column('started_at', Date),
+    Column('viewer_count', Integer),
+    Column('stream_lang', String(15)),
+    Column('category_name', String(80), ForeignKey('categories.category_name')),
+    schema='public'
+)
+
+t_relatorios_canais = Table(
+    'relatorios_canais', metadata,
+    Column('codigo', Integer, primary_key=True),
+    Column('channel_id', String(13), nullable=False, unique=True),
+    Column('broadcaster_name', String(30), ForeignKey('usuarios.display_name'), nullable=False, unique=True),
+    Column('broadcaster_lang', String(15)),
+    schema='public'
+)
+
+t_relatorios_usuarios = Table(
+    'relatorios_usuarios', metadata,
+    Column('codigo', Integer, primary_key=True),
+    Column('user_id', String(13), nullable=False, unique=True),
+    Column('login', String(30), nullable=False, unique=True),
+    Column('display_name', String(30), nullable=False, unique=True),
+    Column('user_type', String(10)),
+    Column('broadcaster_type', String(10)),
+    Column('description', Text),
+    Column('created_at', Date),
+    schema='public'
+)
+
+t_relatorios_categories = Table(
+    'relatorios_categories', metadata,
+    Column('codigo', Integer, primary_key=True),
+    Column('category_id', String(13), nullable=False, unique=True),
+    Column('category_name', String(80), nullable=False, unique=True),
+    schema='public'
+)
