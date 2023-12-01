@@ -181,7 +181,7 @@ class API:
 
     # Função para obter os nomes dos transmissores
     def get_broadcaster_names(self, token_acesso):
-        total_streams = 100
+        total_streams = 2000
         batch_size = 100
         broadcaster_names = []
 

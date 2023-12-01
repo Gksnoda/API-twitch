@@ -1,5 +1,5 @@
-from back.model import *
-from back.populabanco import *
+from model import *
+from populabanco import *
 from view import View
 
 class Controller:
