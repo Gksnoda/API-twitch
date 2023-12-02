@@ -39,7 +39,6 @@ def generateReport():
     df.to_excel("E:/relatorio.xlsx", index=False)
     df.to_html('E:/relatorio.html', index=False)
 
-
 #funcao para limpar o campo do input do valor do filtro
 def clear_form():        
     st.session_state["bar"] = ""
@@ -64,31 +63,91 @@ def df_to_pdf():
 st.set_page_config(page_title="Relatório TwitchAPI")
 
 
-#remove 'Made with Streamlit' da página
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+# Estilização da página
+app_style = """
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
 
+        /* Corpo principal da página*/
+        [data-testid="stAppViewContainer"] {
+            background-color: #392e5c;
+        }
+        [data-testid="stAppViewContainer"] p {
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+        }
+
+
+        /* Título da página */
+        [data-testid="StyledLinkIconContainer"]  {
+            text-align: center !important;
+            color: white !important;
+            font-size: 40px;
+            margin-top: -50px;
+        }
+        [data-testid="stMarkdownContainer"] {
+            color: white;
+        }
+        .css-1iyw2u1 {
+            display: none;
+        }
+
+
+        /* Barra lateral*/
+        [data-testid="stSidebar"] {
+            background-color: #9146ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            font-size: 30px;
+            text-shadow: 2px 2px 2px black;
+            text-align: center;
+        }
+        [data-testid="stSidebar"] img {
+            width: 300px;
+            align-items: center;
+            margin-top: -20px;
+            margin-bottom: 50px;
+        }
+        [data-testid="stSidebar"] h2 {
+            font-size: 30px;
+            color: white;
+            margin-top: -40px;
+        }
+        [data-testid="stSidebar"] * {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        [data-testid="stHorizontalBlock"] {
+            background-color: #392e5c;
+        }
+
+        .st-ef {
+            background-color: #007700;
+        }
+
+
+        
+    </style>
+    """
+st.markdown(app_style, unsafe_allow_html=True) 
 
 #sidebar
 st.sidebar.header("Twitch API")
-##st.sidebar.image('./img/logo.jpg', width=200)
-st.sidebar.write("\n")
-st.sidebar.write("\n")
-st.sidebar.write("\n")
+st.sidebar.image('./img/twitch.png')
 st.sidebar.write("\n")
 st.sidebar.write("\n")
 st.sidebar.header("Desenvolvido por:")
 st.sidebar.write("Guilherme Ribeiro")
 st.sidebar.write("Tales Oliveira")
 
-
 #titulo
-st.title('Relatórios TwitchAPI')
+st.title('Relatórios Twitch API')
 st.write('\n')
 
 
