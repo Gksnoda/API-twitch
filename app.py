@@ -28,16 +28,16 @@ def generateReport():
         query = DAORelatorioCategories.select(session, st.session_state.filters, st.session_state.ordernation, report_fields)
 
     ##print(query.statement)
-
-    df = pd.read_sql_query(query.statement, con = DAO.getSession())
+    connection = session.connection()
+    df = pd.read_sql_query(query.statement, con = connection)
     session.commit()
     session.close()
 
     st.session_state.dataframe = df
 
     #convertendo o dataframe do relatorio para excel e html
-    df.to_excel("E:/relatorio.xlsx", index=False)
-    df.to_html('E:/relatorio.html', index=False)
+    df.to_excel("DB/relatorio.xlsx", index=False)
+    df.to_html('DB/relatorio.html', index=False)
 
 #funcao para limpar o campo do input do valor do filtro
 def clear_form():        
@@ -54,9 +54,9 @@ def set_ordernation():
 
 #converte o arquivo html gerado pelo pandas para pdf
 def df_to_pdf():
-    path_to_wkhtmltopdf = r'E:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+    path_to_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     config = pdf.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
-    pdf.from_file('E:/relatorio.html', 'relatorio.pdf', configuration=config)
+    pdf.from_file('DB/relatorio.html', 'relatorio.pdf', configuration=config)
 
 
 #configuração da página
@@ -196,7 +196,7 @@ if st.session_state.controller == 0:
 
     if st.session_state.query is False:
         if report_type == 'Videos':
-            query = DAORelatorioVideos.select(session, None, None, None)
+            query = DAORelatorioVideos.select(session, None, None, None)    
         elif report_type == 'Streams':
             query = DAORelatorioStreams.select(session, None, None, None)
         elif report_type == 'Canais':
@@ -334,7 +334,7 @@ else:
         with open("relatorio.pdf", "rb") as pdf_file:
             st.session_state.pdfData  = pdf_file.read()
 
-        with open("E:/relatorio.xlsx", "rb") as xlsx_file:
+        with open("DB/relatorio.xlsx", "rb") as xlsx_file:
             st.session_state.xlsxData = xlsx_file.read()
 
     st.session_state.report = st.dataframe(st.session_state.dataframe, width=1000, height=500)

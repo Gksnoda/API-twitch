@@ -5,14 +5,14 @@ from model import *
 from urllib.parse import quote_plus
 
 # Substitua 'sua_senha' pela senha correta do seu banco de dados
-senha_codificada = quote_plus('root')
+senha_codificada = quote_plus('@Senha123')
 # Use a senha codificada na URL de conexão
 
 
 class DAO():
     # Iniciando a sessão com o banco de dados
     def getSession():
-        engine = create_engine(f"postgresql+psycopg2://postgres:{senha_codificada}@localhost:5432/BD2_Twitch")
+        engine = create_engine(f"postgresql+psycopg2://postgres:{senha_codificada}@localhost:5432/BD2_trabalho_Twitch")
         Session = sessionmaker(bind=engine)
         session = Session()
         return session
@@ -107,15 +107,15 @@ class DAORelatorioVideos:
 class DAORelatorioStreams:
     def select(session, conditionsFilters, conditionOrderBy, report_fields):
         if conditionsFilters is None and conditionOrderBy is None and report_fields is None:
-            streams = session.query(t_relatorios_streams)
+            streams = session.query(v_relatorios_streams)
         elif conditionsFilters is None and conditionOrderBy is None:
-            streams = session.query(*[t_relatorios_streams.c[field] for field in report_fields])
+            streams = session.query(*[v_relatorios_streams.c[field] for field in report_fields])
         elif conditionsFilters is None:
-            streams = session.query(*[t_relatorios_streams.c[field] for field in report_fields]).order_by(text(conditionOrderBy))
+            streams = session.query(*[v_relatorios_streams.c[field] for field in report_fields]).order_by(text(conditionOrderBy))
         elif conditionOrderBy is None:
-            streams = session.query(*[t_relatorios_streams.c[field] for field in report_fields]).filter(text(conditionsFilters))
+            streams = session.query(*[v_relatorios_streams.c[field] for field in report_fields]).filter(text(conditionsFilters))
         else:
-            streams = session.query(*[t_relatorios_streams.c[field] for field in report_fields]).filter(text(conditionsFilters)).order_by(text(conditionOrderBy))
+            streams = session.query(*[v_relatorios_streams.c[field] for field in report_fields]).filter(text(conditionsFilters)).order_by(text(conditionOrderBy))
 
         return streams
     

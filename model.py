@@ -91,8 +91,8 @@ t_relatorio_videos = Table(
     schema='public'
 )
 
-t_relatorios_streams = Table(
-    'relatorios_streams', metadata,
+v_relatorios_streams = Table(
+    'v_relatorios_streams', metadata,
     Column('codigo', Integer),
     Column('stream_id', String(13), unique=True),
     Column('broadcaster_name', String(30), ForeignKey('canais.broadcaster_name'), nullable=False),
@@ -114,7 +114,7 @@ t_relatorios_canais = Table(
 )
 
 t_relatorios_usuarios = Table(
-    'relatorios_usuarios', metadata,
+    't_relatorios_usuarios', metadata,
     Column('codigo', Integer, primary_key=True),
     Column('user_id', String(13), nullable=False, unique=True),
     Column('login', String(30), nullable=False, unique=True),
