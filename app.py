@@ -58,21 +58,20 @@ def df_to_pdf():
     config = pdf.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
     pdf.from_file('DB/relatorio.html', 'relatorio.pdf', configuration=config)
 
-
 #configuração da página
-st.set_page_config(page_title="Relatório TwitchAPI")
+st.set_page_config(page_title="Relatório Twitch API")
 
 
 # Estilização da página
 app_style = """
     <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-
         /* Corpo principal da página*/
             [data-testid="stAppViewContainer"] {
-                background-color: #392e5c;
                 width: 100%;
+                /* background: linear-gradient(to bottom left, #6441a5 70%, #ff3e5f); */
+                background: linear-gradient(141deg, #ff3e5f 0%, #6441a5 51%, #6441a5 75%);
+                color: white;
+                font-family: Arial, sans-serif;
             }
 
             /* Título da página */
@@ -81,19 +80,33 @@ app_style = """
                 font-size: 40px;
                 color: white !important;
                 margin-top: -50px;
+                margin-bottom: 20px;
             }
 
             /* Textos da página principal */ 
             [data-testid="stAppViewContainer"] p {
                 font-size: 17.2px;
                 color: white;
+                margin-top: 5px;
             }
 
-            /* Formulário com os filtros */ 
+            /* Formulário para adicionar filtros */ 
             [data-testid="stForm"]{
                 margin-top: -15px;
+                margin-bottom: 15px;
                 border: 2px solid;
-            }   
+            }
+
+            /* Botão para escolher o campo sobre o qual ordenar*/
+            [data-testid="stForm"] .st-aw{
+                width: 210px;
+            }
+
+            /* Botão para ordenar*/
+            .e10yg2by2{
+                text-align: center;
+                align-content: center;
+            }
 
             /* Botões de select */ 
             .st-av {
@@ -104,16 +117,27 @@ app_style = """
             }
 
             /* Campo de texto */ 
-            .st-ch {
+            .st-ci {
                 background-color: #9146ff;
-                border-color: white;
-                color: white;
                 font-size: 20px;
             }
 
-            /* Radio button no fim da página */
+            /* Filtros adicionados */
+            [data-testid="stExpander"]{
+                margin-top: -15px;
+                margin-bottom: 15px;
+                border: 2px solid;
+            }
+
+            /* Radio button de ordenação */
             .st-ef {
-                background-color: #007700;
+                margin-bottom: 0px;
+            }            
+
+            /* Botão para gerar o relatório*/
+            .e1f1d6gn3{
+                text-align: center;
+                align-content: center;
             }
 
         /* Barra lateral*/
@@ -128,11 +152,10 @@ app_style = """
                 text-align: center;
             }
             [data-testid="stSidebar"] img {
-                width: 300px;
-                align-items: center;
                 margin-top: -20px;
-                margin-bottom: 50px;
+                margin-bottom: 30px;
             }
+            /* .e115fcil2 */
 
             [data-testid="stSidebar"] h2 {
                 font-size: 30px;
@@ -140,9 +163,19 @@ app_style = """
                 margin-top: -40px;
             }
             [data-testid="stSidebar"] * {
+                align-items: center;
                 font-size: 20px;
                 font-weight: bold;
                 color: white;
+            }
+
+            [data-testid="stSidebar"] p {
+                margin-bottom: 20px;
+            }
+
+            [data-testid="stSidebar"] hr {
+                margin-top: 2px;
+                margin-bottom: 5px;
             }
     </style>
     """
@@ -154,13 +187,15 @@ st.sidebar.image('./img/twitch.png')
 st.sidebar.write("\n")
 st.sidebar.write("\n")
 st.sidebar.header("Desenvolvido por:")
+st.sidebar.markdown('''<hr>''', unsafe_allow_html=True)
 st.sidebar.write("Guilherme Ribeiro")
 st.sidebar.write("Tales Oliveira")
+st.sidebar.markdown('''<hr>''', unsafe_allow_html=True)
+#st.sidebar.image('./img/streamlit.png', width=35);
 
 #titulo
 st.title('Relatórios Twitch API')
 st.write('\n')
-
 
 #sessions states
 if 'controller' not in st.session_state:
@@ -224,9 +259,10 @@ if st.session_state.controller == 0:
 
     with f2:
         report_fields = st.multiselect(f'Selecione os campos do relatório de {report_type}:', options = st.session_state.df.columns, placeholder = 'Selecionar campo')
+    
+    # Formulário dos filtros
     st.write('\n')
     st.write("Filtrar por campos:")
-
     with st.form("myform"):
         f1, f2, f3 = st.columns([1, 1, 1])
         with f1:
@@ -242,16 +278,16 @@ if st.session_state.controller == 0:
             st.write('\n')
             submit = st.form_submit_button(label="Adicionar filtro", on_click=clear_form)
 
-            
+    # Tipo de comparação a ser feita
     if submit and comparison_value:
         map_operation = {
-        'igual':f'= ',
-        'maior':f'> ',
-        'menor':f'< ',
-        'maior ou igual':f'>= ',
-        'menor ou igual':f'<= ',
-        'diferente de':f'!= ',
-        'contendo a string': 'LIKE \'%'
+            'igual':f'= ',
+            'maior':f'> ',
+            'menor':f'< ',
+            'maior ou igual':f'>= ',
+            'menor ou igual':f'<= ',
+            'diferente de':f'!= ',
+            'contendo a string': 'LIKE \'%'
         }
 
         operation = map_operation[comparison]
@@ -279,29 +315,33 @@ if st.session_state.controller == 0:
         time.sleep(3) 
         container.empty() 
 
-
     if submit and not comparison_value: 
         container = st.empty()
         container.error('Preencha o valor da comparação!') 
         time.sleep(3) 
         container.empty() 
 
-    st.write('\n\n\n')
-
-    with st.expander("Filtros adicionados"):
+    st.write('\n\n\n\n\n\n')
+    st.write('Filtros adicionados:')
+    with st.expander(" "):
         st.write(st.session_state.filters)
 
-    f1, f2, f3 = st.columns([1.5, 1.5, 1])
 
-    with f1:
-        ordernation_field = st.selectbox('Selecione o campo que o relatório será ordenado:', options = st.session_state.df.columns)
+    # Formulário de ordenação do relatório
+    st.write('\n')
+    st.write("Ordenar relatório:")
+    with st.form("myform2"):
+        o1, o2 = st.columns([1.5, 1.5])
+        with o1:
+            ordernation_field = st.selectbox('Ordenar por:', options = st.session_state.df.columns)
+        with o2:
+            ordernation_type = st.radio(f'Campo {ordernation_field} ordenado de modo:', options = ('Crescente', 'Decrescente'), horizontal = True)
         
-    with f2:
-        ordernation_type = st.radio(f'Campo {ordernation_field} ordenado de modo:', options = ('Crescente', 'Decrescente'), horizontal = True)
-
-    with f3:
         st.write('\n\n\n\n\n')
-        ordernation_report = st.button('Ordenar relatório', on_click=set_ordernation)
+        o1, o2 = st.columns([1, 1])
+        
+        st.write('\n')
+        ordernation_report = st.form_submit_button(label='Ordenar relatório', on_click=set_ordernation)
 
     if ordernation_report == 'Crescente':
         ordernation = 'ASC'
