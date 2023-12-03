@@ -70,69 +70,80 @@ app_style = """
         footer {visibility: hidden;}
 
         /* Corpo principal da página*/
-        [data-testid="stAppViewContainer"] {
-            background-color: #392e5c;
-        }
-        [data-testid="stAppViewContainer"] p {
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-        }
+            [data-testid="stAppViewContainer"] {
+                background-color: #392e5c;
+                width: 100%;
+            }
 
+            /* Título da página */
+            [data-testid="StyledLinkIconContainer"]  {
+                text-align: center !important;
+                font-size: 40px;
+                color: white !important;
+                margin-top: -50px;
+            }
 
-        /* Título da página */
-        [data-testid="StyledLinkIconContainer"]  {
-            text-align: center !important;
-            color: white !important;
-            font-size: 40px;
-            margin-top: -50px;
-        }
-        [data-testid="stMarkdownContainer"] {
-            color: white;
-        }
-        .css-1iyw2u1 {
-            display: none;
-        }
+            /* Textos da página principal */ 
+            [data-testid="stAppViewContainer"] p {
+                font-size: 17.2px;
+                color: white;
+            }
 
+            /* Formulário com os filtros */ 
+            [data-testid="stForm"]{
+                margin-top: -15px;
+                border: 2px solid;
+            }   
+
+            /* Botões de select */ 
+            .st-av {
+                background-color: #9146ff;
+                border-color: white;
+                color: white;
+                font-size: 20px;
+            }
+
+            /* Campo de texto */ 
+            .st-ch {
+                background-color: #9146ff;
+                border-color: white;
+                color: white;
+                font-size: 20px;
+            }
+
+            /* Radio button no fim da página */
+            .st-ef {
+                background-color: #007700;
+            }
 
         /* Barra lateral*/
-        [data-testid="stSidebar"] {
-            background-color: #9146ff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            font-size: 30px;
-            text-shadow: 2px 2px 2px black;
-            text-align: center;
-        }
-        [data-testid="stSidebar"] img {
-            width: 300px;
-            align-items: center;
-            margin-top: -20px;
-            margin-bottom: 50px;
-        }
-        [data-testid="stSidebar"] h2 {
-            font-size: 30px;
-            color: white;
-            margin-top: -40px;
-        }
-        [data-testid="stSidebar"] * {
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-        }
+            [data-testid="stSidebar"] {
+                background-color: #9146ff;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-decoration: none;
+                font-size: 30px;
+                text-shadow: 2px 2px 2px black;
+                text-align: center;
+            }
+            [data-testid="stSidebar"] img {
+                width: 300px;
+                align-items: center;
+                margin-top: -20px;
+                margin-bottom: 50px;
+            }
 
-        [data-testid="stHorizontalBlock"] {
-            background-color: #392e5c;
-        }
-
-        .st-ef {
-            background-color: #007700;
-        }
-
-
-        
+            [data-testid="stSidebar"] h2 {
+                font-size: 30px;
+                color: white;
+                margin-top: -40px;
+            }
+            [data-testid="stSidebar"] * {
+                font-size: 20px;
+                font-weight: bold;
+                color: white;
+            }
     </style>
     """
 st.markdown(app_style, unsafe_allow_html=True) 
@@ -182,13 +193,13 @@ if 'dataPdf' not in st.session_state:
 if 'dataXlsx' not in st.session_state:
     st.session_state.dataXlsx = None
 
-#página para gerar o relatório
+# Para gerar o relatório
 if st.session_state.controller == 0:
     f1, f2 = st.columns([1, 1])
 
     with f1:
         report_type = st.selectbox(
-        'Selecione o relatório:',
+        'Selecione a tabela para gerar o relatório:',
         ('Videos', 'Streams', 'Canais', 'Usuários', 'Categorias'), on_change=set_filters_columns_count)
 
     session = DAO.getSession()
@@ -212,17 +223,16 @@ if st.session_state.controller == 0:
     st.session_state.query = True
 
     with f2:
-        report_fields = st.multiselect(f'Selecione os campos do relatório de {report_type}:', options = st.session_state.df.columns)
-
+        report_fields = st.multiselect(f'Selecione os campos do relatório de {report_type}:', options = st.session_state.df.columns, placeholder = 'Selecionar campo')
     st.write('\n')
-    st.write("Selecione os filtros do relatório:")
+    st.write("Filtrar por campos:")
 
     with st.form("myform"):
         f1, f2, f3 = st.columns([1, 1, 1])
         with f1:
             field = st.selectbox("Campo:", options = st.session_state.df.columns)
         with f2:
-            comparison = st.selectbox("Comparação:", options = ('igual', 'maior', 'menor', 'maior ou igual', 'menor ou igual', 'diferente de', 'que possua a string'))
+            comparison = st.selectbox("Comparação:", options = ('igual', 'maior', 'menor', 'maior ou igual', 'menor ou igual', 'diferente de', 'contendo a string'))
         with f3:
             comparison_value = st.text_input("Valor")
 
@@ -241,7 +251,7 @@ if st.session_state.controller == 0:
         'maior ou igual':f'>= ',
         'menor ou igual':f'<= ',
         'diferente de':f'!= ',
-        'que possua a string': 'LIKE \'%'
+        'contendo a string': 'LIKE \'%'
         }
 
         operation = map_operation[comparison]
@@ -291,8 +301,7 @@ if st.session_state.controller == 0:
 
     with f3:
         st.write('\n\n\n\n\n')
-
-        ordernation_report = st.button('Ordenar relatório!', on_click=set_ordernation)
+        ordernation_report = st.button('Ordenar relatório', on_click=set_ordernation)
 
     if ordernation_report == 'Crescente':
         ordernation = 'ASC'
@@ -323,8 +332,7 @@ if st.session_state.controller == 0:
             st.session_state.controller = 1
             st.experimental_rerun()
 
-
-#página com o relatório gerado
+# Página do relatório
 else:
     if st.session_state.report == False:
 
