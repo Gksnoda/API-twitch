@@ -5,7 +5,7 @@ from DAO import *
 from model import *
 import pdfkit as pdf
 
-#funcao que ira gerar o relatorio, com base nos campos, filtros e ordenação selecionado pelo usuario
+# Função para gerar o relatório a partir dos critérios selecionados
 def generateReport():
     if not report_fields:
         return -1
@@ -27,7 +27,6 @@ def generateReport():
     if report_type == 'Categorias':
         query = DAORelatorioCategories.select(session, st.session_state.filters, st.session_state.ordernation, report_fields)
 
-    ##print(query.statement)
     connection = session.connection()
     df = pd.read_sql_query(query.statement, con = connection)
     session.commit()
@@ -35,15 +34,16 @@ def generateReport():
 
     st.session_state.dataframe = df
 
-    #convertendo o dataframe do relatorio para excel e html
+    # Convertendo o dataframe do relatorio para excel e html
     df.to_excel("DB/relatorio.xlsx", index=False)
     df.to_html('DB/relatorio.html', index=False)
 
-#funcao para limpar o campo do input do valor do filtro
+# Função para limpar o campo do input do valor do filtro
 def clear_form():        
     st.session_state["bar"] = ""
 
-#funcoes para setar alguns session_states que precisamos utilizar 
+# ======================================
+# Session_states
 def set_filters_columns_count():
     st.session_state.filters = ""
     st.session_state.query = False
@@ -51,16 +51,16 @@ def set_filters_columns_count():
 
 def set_ordernation():
     st.session_state.ordernation = True
+# ======================================
 
-#converte o arquivo html gerado pelo pandas para pdf
+# Converter o relatório para pdf
 def df_to_pdf():
     path_to_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     config = pdf.configuration(wkhtmltopdf=path_to_wkhtmltopdf)
     pdf.from_file('DB/relatorio.html', 'relatorio.pdf', configuration=config)
 
-#configuração da página
+#Configurações da página, aqui está sendo mostrado o título da página (na aba do navegador)
 st.set_page_config(page_title="Relatório Twitch API")
-
 
 # Estilização da página
 app_style = """
@@ -181,7 +181,7 @@ app_style = """
     """
 st.markdown(app_style, unsafe_allow_html=True) 
 
-#sidebar
+# Barra lateral
 st.sidebar.header("Twitch API")
 st.sidebar.image('./img/twitch.png')
 st.sidebar.write("\n")
@@ -281,32 +281,32 @@ if st.session_state.controller == 0:
     # Tipo de comparação a ser feita
     if submit and comparison_value:
         map_operation = {
-            'igual':f'= ',
-            'maior':f'> ',
-            'menor':f'< ',
-            'maior ou igual':f'>= ',
-            'menor ou igual':f'<= ',
-            'diferente de':f'!= ',
+            'igual': f'= ',
+            'maior': f'> ',
+            'menor': f'< ',
+            'maior ou igual': f'>= ',
+            'menor ou igual': f'<= ',
+            'diferente de': f'!= ',
             'contendo a string': 'LIKE \'%'
         }
 
         operation = map_operation[comparison]
-        
-        if st.session_state.df[f'{field}'].dtypes == 'object' and not comparison == 'que possua a string':
+            
+        if st.session_state.df[f'{field}'].dtypes == 'object' and not comparison == 'contendo a string':
             value = f"'{comparison_value}'"
-        elif comparison == 'que possua a string':
+        elif comparison == 'contendo a string':
             value = f"{comparison_value}"
         else:
             value = f'{comparison_value}'
 
-        #adiciona os filtros
+        # Adiciona os filtros
         if st.session_state.countFilters == 0:
             st.session_state.filters += f"{field} {operation}{value}"
         else:
             st.session_state.filters += f" AND {field} {operation}{value}"
 
-        #se a comparação for "que possua a string", precisamos adicionar o % no final para realizar a consulta
-        if comparison == 'que possua a string':
+        # Caso a opçãp "contendo a string" seja utilizada, precisamos adicionar o % no final para realizar a consulta
+        if comparison == 'contendo a string':
             st.session_state.filters += '%\''
 
         st.session_state.countFilters = 1
