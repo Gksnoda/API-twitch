@@ -4,6 +4,7 @@ import time
 from DAO import *
 from model import *
 import pdfkit as pdf
+import matplotlib.pyplot as plt
 
 # Função para gerar o relatório a partir dos critérios selecionados
 def generateReport():
@@ -370,7 +371,7 @@ if st.session_state.controller == 0:
             st.error("Selecione os campos do relatório!")
         else:
             st.session_state.controller = 1
-            st.experimental_rerun()
+            st.rerun()
 
 # Página do relatório
 else:
@@ -410,5 +411,26 @@ else:
         st.session_state.ordernation = None
         st.session_state.report = False
         report_fields = []
-        st.experimental_rerun()
+        st.rerun()
 
+    with f1:
+        report_type = st.selectbox(
+            'Selecione o relatório:',
+            ('Videos', 'Streams', 'Canais', 'Usuários', 'Categorias'), on_change=set_filters_columns_count)
+
+    with f2:
+        st.session_state.report_fields = st.multiselect(f'Selecione os campos do relatório de {report_type}:', options=st.session_state.df.columns)
+
+# Adicione a lógica para o gráfico aqui
+    if st.session_state.report and 'report_fields' in st.session_state and len(st.session_state.report_fields) >= 2:
+        x_column = st.session_state.report_fields[0]
+        y_column = st.session_state.report_fields[1]
+        grouped_data = st.session_state.df.groupby(x_column)[y_column].count().reset_index()
+
+        st.write('\n\n')
+        st.write(f"Gráfico de contagem de {y_column} agrupado por {x_column}:")
+
+        # Use st.pyplot() para exibir a figura Matplotlib
+        fig, ax = plt.subplots()
+        grouped_data.plot(kind='bar', x=x_column, y=y_column, ax=ax)
+        st.pyplot(fig)
